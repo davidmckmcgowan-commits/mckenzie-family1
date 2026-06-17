@@ -1,1 +1,47 @@
-<!DOCTYPE html><html><head><title>test</title></head><body><h1>Hello</h1></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The McKenzie Story</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;500;600&display=swap"/><style>
+:root{--green-dark:#0a4a35;--green-mid:#0F6E56;--green-light:#1D9E75;--green-pale:#E1F5EE;--amber:#BA7517;--amber-pale:#FAEEDA;--coral:#993C1D;--coral-pale:#FAECE7;--blue-pale:#E6F1FB;--blue-mid:#185FA5;--pink-pale:#FBEAF0;--pink-mid:#993556;--text:#1a1a18;--text-muted:#5a5a55;--text-faint:#8a8a82;--bg:#fafaf7;--bg2:#f2f2ec;--border:rgba(0,0,0,0.1);--radius:12px;--radius-sm:8px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:16px;line-height:1.6;}
+nav{background:var(--green-dark);padding:0 24px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--green-light);}
+.nav-logo{font-family:'Playfair Display',serif;font-size:18px;color:#9FE1CB;padding:14px 0;margin-right:16px;}
+.nav-links{display:flex;gap:4px;flex-wrap:wrap;}
+.nav-btn{background:none;border:none;color:#9FE1CB;font-family:'Inter',sans-serif;font-size:13px;padding:8px 14px;border-radius:99px;cursor:pointer;transition:background 0.15s;opacity:0.75;}
+.nav-btn:hover{background:rgba(255,255,255,0.1);opacity:1;}
+.nav-btn.active{background:rgba(255,255,255,0.15);opacity:1;color:#fff;}
+.section{display:none;}.section.active{display:block;}
+</style>
+</head>
+<body><nav>
+<div class="nav-logo">The McKenzie Story</div>
+<div class="nav-links">
+<button class="nav-btn active" onclick="show('home')">Home</button>
+<button class="nav-btn" onclick="show('tree')">Family tree</button>
+<button class="nav-btn" onclick="show('journey')">The journey</button>
+<button class="nav-btn" onclick="show('map')">Map</button>
+<button class="nav-btn" onclick="show('stories')">Cool stories</button>
+<button class="nav-btn" onclick="show('about')">Mysteries</button>
+</div>
+</nav>
+
+<div id="sec-home" class="section active" style="padding:40px 24px;max-width:820px;margin:0 auto;">
+<h1 style="font-family:'Playfair Display',serif;font-size:48px;margin-bottom:16px;">The McKenzie Story</h1>
+<p style="font-size:18px;color:var(--text-muted);margin-bottom:32px;">From the Scottish Highlands to the shores of Western Australia — the extraordinary journey of your ancestors.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;">
+<div onclick="show('tree')" style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:24px;cursor:pointer;">
+<div style="font-size:32px;margin-bottom:12px;">&#127795;</div>
+<div style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:6px;">Family tree</div>
+<div style="font-size:13px;color:var(--text-muted);">Click on anyone to find out their story.</div>
+</div>
+<div onclick="show('journey')" style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:24px;cursor:pointer;">
+<div style="font-size:32px;margin-bottom:12px;">&#128506;</div>
+<div style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:6px;">The journey</div>
+<div style="font-size:13px;color:var(--text-muted);">Scotland to Canada to Australia.</div>
+</div>
+<div
