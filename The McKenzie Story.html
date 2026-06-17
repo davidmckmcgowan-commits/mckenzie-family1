@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<!-- saved from url=(0060)file:///C:/Users/david/Downloads/mckenzie-family-tree_5.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The McKenzie Story</title>
+<link rel="stylesheet" href="./The McKenzie Story_files/leaflet.css">
+<style>
+  /* MAP */
+  #map { height: 520px; width: 100%; border-radius: var(--radius); border: 1px solid var(--border); }
+  .map-page { padding: 24px 16px; max-width: 960px; margin: 0 auto; }
+  .stop-cards { display: flex; gap: 10px; overflow-x: auto; padding: 4px 0 12px; scroll-snap-type: x mandatory; }
+  .stop-card {
+    flex: 0 0 220px; scroll-snap-align: start;
+    background: #fff; border: 2px solid var(--border);
+    border-radius: var(--radius); padding: 14px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .stop-card:hover, .stop-card.active { border-color: var(--green-mid); transform: translateY(-2px); }
+  .stop-num { width: 28px; height: 28px; border-radius: 50%; background: var(--green-mid); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+  .stop-year { font-size: 11px; font-weight: 700; color: var(--green-mid); letter-spacing: 0.06em; }
+  .stop-place { font-family: 'Playfair Display', serif; font-size: 15px; margin: 3px 0; }
+  .stop-how { font-size: 11px; color: var(--text-faint); display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+  .transport-pill { display: inline-flex; align-items: center; gap: 5px; background: var(--amber-pale); color: var(--amber); border-radius: 99px; padding: 3px 10px; font-size: 11px; font-weight: 600; margin-top: 6px; }
+  .map-popup-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .map-popup-body { font-size: 13px; line-height: 1.5; color: #444; }
+  .map-popup-year { font-size: 11px; font-weight: 700; color: var(--green-mid); margin-bottom: 4px; }
+  .map-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 12px; color: var(--text-muted); }
+  .map-legend-item { display: flex; align-items: center; gap: 6px; }
+  .leg-line { width: 28px; height: 3px; border-radius: 2px; }
+  .photo-placeholder { background: var(--bg2); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 12px; text-align: center; font-size: 12px; color: var(--text-faint); margin-top: 8px; }
+</style>
+  </head><body>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&amp;family=Inter:wght@400;500;600&amp;display=swap');
+
+  :root {
+    --green-dark: #0a4a35;
+    --green-mid: #0F6E56;
+    --green-light: #1D9E75;
+    --green-pale: #E1F5EE;
+    --amber: #BA7517;
+    --amber-pale: #FAEEDA;
+    --coral: #993C1D;
+    --coral-pale: #FAECE7;
+    --blue-pale: #E6F1FB;
+    --blue-mid: #185FA5;
+    --pink-pale: #FBEAF0;
+    --pink-mid: #993556;
+    --text: #1a1a18;
+    --text-muted: #5a5a55;
+    --text-faint: #8a8a82;
+    --bg: #fafaf7;
+    --bg2: #f2f2ec;
+    --border: rgba(0,0,0,0.1);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* NAV */
+  nav {
+    background: var(--green-dark);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 2px solid var(--green-light);
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: #9FE1CB;
+    padding: 14px 0;
+    margin-right: 16px;
+    white-space: nowrap;
+  }
+  .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
+  .nav-btn {
+    background: none;
+    border: none;
+    color: #9FE1CB;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: background 0.15s;
+    opacity: 0.75;
+  }
+  .nav-btn:hover { background: rgba(255,255,255,0.1); opacity: 1; }
+  .nav-btn.active { background: rgba(255,255,255,0.15); opacity: 1; color: #fff; }
+
+  /* SECTIONS */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ===== HERO ===== */
+  .hero {
+    background: var(--green-dark);
+    color: #E1F5EE;
+    padding: 56px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(255,255,255,0.015) 40px,
+      rgba(255,255,255,0.015) 80px
+    );
+  }
+  .hero-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--green-light);
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 7vw, 64px);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .hero-sub {
+    font-size: 18px;
+    color: #9FE1CB;
+    max-width: 540px;
+    margin: 0 auto 32px;
+    line-height: 1.5;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .hero-stat {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    text-align: center;
+    min-width: 100px;
+  }
+  .hero-stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: #fff;
+    line-height: 1;
+  }
+  .hero-stat-label { font-size: 11px; color: #5DCAA5; margin-top: 4px; }
+  .hero-scroll-hint {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 12px;
+    font-size: 12px;
+    color: #5DCAA5;
+    text-align: center;
+  }
+
+  /* ===== TREE ===== */
+  .tree-page { padding: 24px 16px; max-width: 960px; margin: 0 auto; }
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+  .page-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+
+  .gen-block { margin-bottom: 8px; }
+  .gen-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 10px;
+    padding-left: 4px;
+  }
+  .gen-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .pcard {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-width: 130px;
+    flex: 0 0 auto;
+    position: relative;
+  }
+  .pcard:hover { border-color: var(--green-light); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .pcard.active { border-color: var(--green-mid); border-width: 2px; }
+  .pcard.key-figure { border-left: 3px solid var(--amber); }
+  .av {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .av-m { background: var(--blue-pale); color: var(--blue-mid); }
+  .av-f { background: var(--pink-pale); color: var(--pink-mid); }
+  .pname { font-size: 13px; font-weight: 600; line-height: 1.3; }
+  .pyears { font-size: 11px; color: var(--text-faint); margin-top: 3px; }
+  .ptag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 99px;
+    margin-top: 5px;
+    font-weight: 500;
+  }
+  .tag-whaler { background: #E6F1FB; color: var(--blue-mid); }
+  .tag-captain { background: var(--amber-pale); color: var(--amber); }
+  .tag-soldier { background: var(--coral-pale); color: var(--coral); }
+  .tag-mayor { background: var(--green-pale); color: var(--green-dark); }
+  .tag-engineer { background: #EAF3DE; color: #3B6D11; }
+
+  .branch-v {
+    width: 2px; height: 24px;
+    background: var(--border);
+    margin: 0 0 8px 22px;
+    border-radius: 2px;
+  }
+
+  /* DETAIL PANEL */
+  .detail-panel {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-top: 20px;
+    display: none;
+  }
+  .detail-panel.open { display: block; }
+  .detail-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+  .detail-av {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .detail-name { font-family: 'Playfair Display', serif; font-size: 22px; line-height: 1.2; }
+  .detail-dates { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+  .detail-body { font-size: 14px; line-height: 1.75; color: var(--text-muted); margin-bottom: 16px; }
+  .detail-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .fact-card {
+    background: var(--bg2);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+  }
+  .fact-label { font-size: 10px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+  .fact-val { font-size: 13px; font-weight: 500; margin-top: 2px; }
+  .wow-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--amber-pale);
+    color: var(--amber);
+    border-radius: 99px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .wow-badge::before { content: '★'; }
+
+  /* ===== JOURNEY ===== */
+  .journey-page { padding: 24px 16px; max-width: 720px; margin: 0 auto; }
+  .timeline { position: relative; padding-left: 32px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px; top: 6px; bottom: 6px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--green-light), var(--green-pale));
+    border-radius: 2px;
+  }
+  .t-item { position: relative; margin-bottom: 32px; }
+  .t-dot {
+    position: absolute;
+    left: -27px; top: 3px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--green-mid);
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--green-light);
+  }
+  .t-year {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green-mid);
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+  .t-loc {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  .t-flag {
+    display: inline-block;
+    background: var(--bg2);
+    border-radius: 99px;
+    padding: 2px 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .t-body { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+  .t-highlight {
+    background: var(--green-pale);
+    border-left: 3px solid var(--green-light);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 10px 14px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--green-dark);
+    font-style: italic;
+  }
+
+  /* ===== STORIES ===== */
+  .stories-page { padding: 24px 16px; max-width: 960px; margin: 0 auto; }
+  .story-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .story-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .story-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.09); }
+  .story-thumb {
+    height: 7px;
+  }
+  .thumb-green { background: var(--green-mid); }
+  .thumb-amber { background: var(--amber); }
+  .thumb-coral { background: var(--coral); }
+  .thumb-blue { background: var(--blue-mid); }
+  .thumb-purple { background: #534AB7; }
+  .story-body { padding: 18px; }
+  .story-icon { font-size: 28px; margin-bottom: 10px; }
+  .story-title { font-family: 'Playfair Display', serif; font-size: 17px; margin-bottom: 6px; line-height: 1.3; }
+  .story-teaser { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px; }
+  .story-expand-btn {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green-mid);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .story-expand-btn::after { content: '▼'; font-size: 9px; transition: transform 0.2s; }
+  .story-expand-btn.open::after { transform: rotate(180deg); }
+  .story-full {
+    padding: 0 18px 18px;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.75;
+    display: none;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    margin-top: 2px;
+  }
+  .story-full.open { display: block; }
+  .quote {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 14px;
+    border-left: 3px solid var(--amber);
+    padding: 8px 14px;
+    margin: 12px 0;
+    color: var(--text);
+    background: var(--amber-pale);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+
+  /* ===== ABOUT ===== */
+  .about-page { padding: 24px 16px; max-width: 660px; margin: 0 auto; }
+  .about-page p { font-size: 15px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.75; }
+  .about-page h2 { font-family: 'Playfair Display', serif; font-size: 22px; margin: 24px 0 12px; }
+  .mystery-card {
+    background: var(--amber-pale);
+    border: 1px solid rgba(186,117,23,0.2);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .mystery-title { font-weight: 600; font-size: 14px; color: var(--amber); margin-bottom: 4px; }
+  .mystery-body { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  /* SHARED */
+  h2.section-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+  .section-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+
+  @media (max-width: 600px) {
+    .hero { padding: 40px 16px 32px; }
+    .hero h1 { font-size: 36px; }
+    nav { padding: 0 12px; }
+    .nav-logo { font-size: 15px; }
+  }
+
+
+
+
+<nav>
+  <div class="nav-logo">The McKenzie Story</div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="show(&#39;home&#39;)">Home</button>
+    <button class="nav-btn" onclick="show(&#39;tree&#39;)">Family tree</button>
+    <button class="nav-btn" onclick="show(&#39;journey&#39;)">The journey</button>
+    <button class="nav-btn" onclick="show(&#39;map&#39;)">🗺 Map</button>
+    <button class="nav-btn" onclick="show(&#39;stories&#39;)">Cool stories</button>
+    <button class="nav-btn" onclick="show(&#39;about&#39;)">Mysteries</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div id="sec-home" class="section active">
+  <div class="hero">
+    <p class="hero-eyebrow">Your family history</p>
+    <h1>The McKenzie Story</h1>
+    <p class="hero-sub">From the Scottish Highlands to the shores of Western Australia — the extraordinary journey of your ancestors.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-label">Generations</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">1767</div><div class="hero-stat-label">Story begins</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-label">Continents</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">Albany</div><div class="hero-stat-label">Home since 1840</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">74</div><div class="hero-stat-label">Years John lived in Albany</div></div>
+    </div>
+  </div>
+
+  <div style="padding: 40px 16px; max-width: 820px; margin: 0 auto;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;">
+
+      <div onclick="show(&#39;tree&#39;)" style="background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:24px; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.transform=&#39;translateY(-3px)&#39;" onmouseout="this.style.transform=&#39;&#39;">
+        <div style="font-size:32px; margin-bottom:12px; color:var(--green-mid);">🌳</div>
+        <div style="font-family:&#39;Playfair Display&#39;,serif; font-size:18px; margin-bottom:6px;">Family tree</div>
+        <div style="font-size:13px; color:var(--text-muted);">Click on anyone in the family to find out their story.</div>
+      </div>
+
+      <div onclick="show(&#39;map&#39;)" style="background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:24px; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.transform=&#39;translateY(-3px)&#39;" onmouseout="this.style.transform=&#39;&#39;">
+        <div style="font-size:32px; margin-bottom:12px; color:var(--blue-mid);">🗺️</div>
+        <div style="font-family:&#39;Playfair Display&#39;,serif; font-size:18px; margin-bottom:6px;">Migration map</div>
+        <div style="font-size:13px; color:var(--text-muted);">Follow the family's route by ship and land — Scotland to Albany.</div>
+      </div>
+
+      <div onclick="show(&#39;journey&#39;)" style="background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:24px; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.transform=&#39;translateY(-3px)&#39;" onmouseout="this.style.transform=&#39;&#39;">
+        <div style="font-size:32px; margin-bottom:12px; color:var(--green-mid);">🗺️</div>
+        <div style="font-family:&#39;Playfair Display&#39;,serif; font-size:18px; margin-bottom:6px;">The journey</div>
+        <div style="font-size:13px; color:var(--text-muted);">Scotland → Ireland → Canada → Australia. Follow the route.</div>
+      </div>
+
+      <div onclick="show(&#39;stories&#39;)" style="background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:24px; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.transform=&#39;translateY(-3px)&#39;" onmouseout="this.style.transform=&#39;&#39;">
+        <div style="font-size:32px; margin-bottom:12px; color:var(--green-mid);">⚔️</div>
+        <div style="font-family:&#39;Playfair Display&#39;,serif; font-size:18px; margin-bottom:6px;">Cool stories</div>
+        <div style="font-size:13px; color:var(--text-muted);">Battles, whaling accidents, gold rushes, murder trials...</div>
+      </div>
+
+      <div onclick="show(&#39;about&#39;)" style="background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:24px; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.transform=&#39;translateY(-3px)&#39;" onmouseout="this.style.transform=&#39;&#39;">
+        <div style="font-size:32px; margin-bottom:12px; color:var(--amber);">🔍</div>
+        <div style="font-family:&#39;Playfair Display&#39;,serif; font-size:18px; margin-bottom:6px;">Mysteries</div>
+        <div style="font-size:13px; color:var(--text-muted);">Unsolved questions the family is still trying to answer.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; background: var(--green-pale); border-radius:var(--radius); padding:24px; border-left: 4px solid var(--green-light);">
+      <div style="font-family:&#39;Playfair Display&#39;,serif; font-size:17px; font-style:italic; color:var(--green-dark); line-height:1.6; margin-bottom:10px;">
+        "The late Mr. McKenzie's life practically covered the entire history of the town... Having roughed it himself, he had sympathy for those struggling, and was generous to a fault in the assistance he gave."
+      </div>
+      <div style="font-size:12px; color:var(--green-mid); font-weight:600;">— Albany newspaper eulogy for John McKenzie, 1914</div>
+    </div>
+  </div>
+</div>
+
+<!-- FAMILY TREE -->
+<div id="sec-tree" class="section">
+  <div class="tree-page">
+    <h2 class="section-heading">Family tree</h2>
+    <p class="section-sub">Click anyone to learn their story. Gold border = especially important to the family's history.</p>
+
+    <div class="gen-block">
+      <div class="gen-label">Generation 1 — the founders (Scotland)</div>
+      <div class="gen-row">
+        <div class="pcard key-figure" onclick="openPerson(&#39;hugh1&#39;)">
+          <div class="av av-m">H1</div>
+          <div class="pname">Hugh McKenzie Sr</div>
+          <div class="pyears">~1767 – 1841</div>
+          <span class="ptag tag-soldier">Soldier</span>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;bridget&#39;)">
+          <div class="av av-f">BE</div>
+          <div class="pname">Bridget Erskine</div>
+          <div class="pyears">m. 1801</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="branch-v"></div>
+
+    <div class="gen-block">
+      <div class="gen-label">Generation 2 — Hugh Sr's children (born Scotland)</div>
+      <div class="gen-row">
+        <div class="pcard" onclick="openPerson(&#39;john_g2&#39;)">
+          <div class="av av-m">JM</div>
+          <div class="pname">John</div>
+          <div class="pyears">b. 1803</div>
+        </div>
+        <div class="pcard key-figure" onclick="openPerson(&#39;hugh2&#39;)">
+          <div class="av av-m">H2</div>
+          <div class="pname">Hugh Jr</div>
+          <div class="pyears">1804 – 1854</div>
+          <span class="ptag tag-captain">Ship captain</span>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;kenneth_g2&#39;)">
+          <div class="av av-m">KM</div>
+          <div class="pname">Kenneth</div>
+          <div class="pyears">1806 – 1844</div>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;edward_g2&#39;)">
+          <div class="av av-m">EM</div>
+          <div class="pname">Edward</div>
+          <div class="pyears">~1813 – 1854</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="branch-v"></div>
+
+    <div class="gen-block">
+      <div class="gen-label">Generation 3 — Hugh Jr &amp; Isabelle Hind's children</div>
+      <div class="gen-row">
+        <div class="pcard" onclick="openPerson(&#39;isabella_g3&#39;)">
+          <div class="av av-f">IM</div>
+          <div class="pname">Isabella</div>
+          <div class="pyears">b. ~1830</div>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;emily_g3&#39;)">
+          <div class="av av-f">EM</div>
+          <div class="pname">Emily</div>
+          <div class="pyears">b. ~1832</div>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;hugh_g3&#39;)">
+          <div class="av av-m">HM</div>
+          <div class="pname">Hugh</div>
+          <div class="pyears">b. ~1834</div>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;brigid_g3&#39;)">
+          <div class="av av-f">BM</div>
+          <div class="pname">Brigid</div>
+          <div class="pyears">1836 – 1860</div>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;catherine_g3&#39;)">
+          <div class="av av-f">CM</div>
+          <div class="pname">Catherine</div>
+          <div class="pyears">b. ~1838</div>
+        </div>
+        <div class="pcard key-figure" onclick="openPerson(&#39;john_g3&#39;)">
+          <div class="av av-m">JM</div>
+          <div class="pname">John McKenzie</div>
+          <div class="pyears">1840 – 1914</div>
+          <span class="ptag tag-whaler">Whaler</span>
+          <span class="ptag tag-mayor">Mayor</span>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;margaret_g3&#39;)">
+          <div class="av av-f">MM</div>
+          <div class="pname">Margaret</div>
+          <div class="pyears">b. 1842</div>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;cuthbert_g3&#39;)">
+          <div class="av av-m">CM</div>
+          <div class="pname">Cuthbert</div>
+          <div class="pyears">b. 1851</div>
+          <span class="ptag tag-mayor">Politician</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="branch-v"></div>
+
+    <div class="gen-block">
+      <div class="gen-label">Generation 4 — John &amp; Jannett Moir's children</div>
+      <div class="gen-row">
+        <div class="pcard" onclick="openPerson(&#39;hugh_g4&#39;)">
+          <div class="av av-m">HL</div>
+          <div class="pname">Hugh Laurie</div>
+          <div class="pyears">1862 – 1914</div>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;emaline&#39;)">
+          <div class="av av-f">EC</div>
+          <div class="pname">Emaline</div>
+          <div class="pyears">b. 1863</div>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;johnjr&#39;)">
+          <div class="av av-m">JE</div>
+          <div class="pname">John Edward Jr</div>
+          <div class="pyears">1866 – 1897</div>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;william&#39;)">
+          <div class="av av-m">WC</div>
+          <div class="pname">William Cuthbert</div>
+          <div class="pyears">1868 – 1901</div>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;albert&#39;)">
+          <div class="av av-m">AH</div>
+          <div class="pname">Albert Henry</div>
+          <div class="pyears">1870 – 1916</div>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;leslie&#39;)">
+          <div class="av av-m">LE</div>
+          <div class="pname">Leslie Ernest</div>
+          <div class="pyears">1872 – 1926</div>
+        </div>
+        <div class="pcard key-figure" onclick="openPerson(&#39;ernest&#39;)">
+          <div class="av av-m">EG</div>
+          <div class="pname">Ernest George</div>
+          <div class="pyears">b. 1877</div>
+          <span class="ptag tag-engineer">Engineer</span>
+        </div>
+        <div class="pcard" onclick="openPerson(&#39;sabina&#39;)">
+          <div class="av av-f">SJ</div>
+          <div class="pname">Sabina Janet</div>
+          <div class="pyears">1879 – 1958</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-panel" id="detail">
+      <div class="detail-header">
+        <div class="detail-av" id="d-av"></div>
+        <div>
+          <div class="detail-name" id="d-name"></div>
+          <div class="detail-dates" id="d-dates"></div>
+        </div>
+      </div>
+      <div class="detail-body" id="d-body"></div>
+      <div class="detail-facts" id="d-facts"></div>
+      <div id="d-wow"></div>
+    </div>
+  </div>
+</div>
+
+<!-- JOURNEY -->
+<div id="sec-journey" class="section">
+  <div class="journey-page">
+    <h2 class="section-heading">The journey</h2>
+    <p class="section-sub">Your family crossed the world over 75 years. Here's how they got here.</p>
+
+    <div class="timeline">
+
+      <div class="t-item">
+        <div class="t-dot"></div>
+        <div class="t-year">~1767</div>
+        <div class="t-loc">Invergordon, Scottish Highlands</div>
+        <div class="t-flag">🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland</div>
+        <div class="t-body">Hugh McKenzie Sr is born in the rugged Highlands of northern Scotland. The area is beautiful but harsh — people farm, fish, and trade along the coast. The McKenzies are part of the proud McKenzie clan, whose ancient gathering place was a hill called Tulloch.</div>
+      </div>
+
+      <div class="t-item">
+        <div class="t-dot"></div>
+        <div class="t-year">1794 – 1802</div>
+        <div class="t-loc">Ireland — fighting in a rebellion</div>
+        <div class="t-flag">🇮🇪 Ireland</div>
+        <div class="t-body">Hugh joins the Caithness Legion and is sent to Ireland, where a violent uprising against British rule is taking place. He fights and survives. He serves over 7 years, reaching the rank of Sergeant. Near the town of Drogheda he meets Bridget Erskine, and they marry around 1801.</div>
+        <div class="t-highlight">"He served 7 years and 7 months, finishing as a sergeant." — family records</div>
+      </div>
+
+      <div class="t-item">
+        <div class="t-dot"></div>
+        <div class="t-year">1803 – 1825</div>
+        <div class="t-loc">Kirkcudbright &amp; Balmaghie, Scotland</div>
+        <div class="t-flag">🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland</div>
+        <div class="t-body">The family returns to Scotland — but to the south-west, far from where Hugh grew up. Children are born: John (1803), Hugh Jr (1804), Kenneth (1806), and others. Hugh probably works in coastal trading and possibly whaling. Life is reasonable, but things are about to change.</div>
+      </div>
+
+      <div class="t-item">
+        <div class="t-dot"></div>
+        <div class="t-year">1826</div>
+        <div class="t-loc">New Brunswick, Canada</div>
+        <div class="t-flag">🇨🇦 Canada</div>
+        <div class="t-body">The family is forced off their land in the Highland Clearances — rich landlords evicted thousands of Scottish tenant families to make room for sheep farming. One source calls Hugh "an exile from Scotland." The McKenzies sail to Canada and arrive in St John, New Brunswick. Within 10 days of arriving, Hugh applies for 200 acres of land!</div>
+        <div class="t-highlight">The Highland Clearances were one of the most painful events in Scottish history — whole communities were destroyed overnight.</div>
+      </div>
+
+      <div class="t-item">
+        <div class="t-dot"></div>
+        <div class="t-year">1826 – 1840</div>
+        <div class="t-loc">Nova Scotia &amp; New Brunswick, Canada</div>
+        <div class="t-flag">🇨🇦 Canada</div>
+        <div class="t-body">The family builds a life in Canada. More children are born, including John — the youngest son — in April 1840 in Nova Scotia, just months before the next great journey. Hugh Jr becomes a ship's captain, commanding vessels across the Atlantic. He sails coal and cargo from Ireland to England, and travels as far as Jamaica.</div>
+      </div>
+
+      <div class="t-item">
+        <div class="t-dot"></div>
+        <div class="t-year">October 1840</div>
+        <div class="t-loc">Setting sail for Australia</div>
+        <div class="t-flag">⛵ At sea</div>
+        <div class="t-body">The extended McKenzie family boards a ship called "The Brothers" and sets sail for the other side of the world. On board is 6-month-old baby John, who would go on to become one of Albany's greatest citizens. The voyage takes about 2 months.</div>
+      </div>
+
+      <div class="t-item">
+        <div class="t-dot"></div>
+        <div class="t-year">December 1840</div>
+        <div class="t-loc">Albany, Western Australia</div>
+        <div class="t-flag">🇦🇺 Australia</div>
+        <div class="t-body">The family arrives in Albany — a tiny settlement of around 200 people on the south coast of Western Australia. It's remote, rugged, and full of opportunity. Tragically, Hugh Sr dies just weeks later in January 1841, aged about 74. But the family stays, and Albany becomes the McKenzie home for generations.</div>
+        <div class="t-highlight">"When 'The Brothers' arrived in Albany in December 1840, on board was eight-month old Canadian born John." — family history</div>
+      </div>
+
+      <div class="t-item">
+        <div class="t-dot"></div>
+        <div class="t-year">1840 onwards</div>
+        <div class="t-loc">Building Albany</div>
+        <div class="t-flag">🇦🇺 Albany, WA</div>
+        <div class="t-body">The McKenzies don't just live in Albany — they help build it. Hugh Jr runs the Ship Inn. John becomes a whaler at 14, then buys the Freemasons Hotel, becomes Mayor three times, fights for public rights to the foreshore, establishes Albany's first Masonic lodge, and is remembered as one of the town's founding fathers. His brother Cuthbert becomes a Member of Parliament.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- STORIES -->
+<div id="sec-stories" class="section">
+  <div class="stories-page">
+    <h2 class="section-heading">Cool stories</h2>
+    <p class="section-sub">Your ancestors had remarkable lives. Here are the most extraordinary moments.</p>
+
+    <div class="story-grid">
+
+      <div class="story-card">
+        <div class="story-thumb thumb-coral"></div>
+        <div class="story-body">
+          <div class="story-icon">⚔️</div>
+          <div class="story-title">The soldier who crossed the world</div>
+          <div class="story-teaser">Hugh Sr fought in a real rebellion — then somehow ended up in Western Australia.</div>
+          <button class="story-expand-btn" onclick="toggleStory(this)">Read more</button>
+        </div>
+        <div class="story-full">
+          <p>Hugh McKenzie Sr joined a military unit called the Caithness Legion and was sent to Ireland during the Irish Rebellion of 1798 — a violent uprising against British rule. He fought, survived, and served for over 7 years, reaching the rank of Sergeant.</p>
+          <p>After leaving the army, he returned to Scotland, had a family, and then got thrown off his land in the Highland Clearances. He moved his family to Canada, built a new life, and then — in his 70s — got on yet another ship to Australia.</p>
+          <p>He arrived in Albany in December 1840 and died just weeks later in January 1841, aged about 74. He had lived in three countries on three continents and crossed the Atlantic twice.</p>
+          <div class="quote">"An exile from Scotland" — how one source described Hugh Sr after the Highland Clearances</div>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <div class="story-thumb thumb-blue"></div>
+        <div class="story-body">
+          <div class="story-icon">🚢</div>
+          <div class="story-title">Ship captain Hugh Jr</div>
+          <div class="story-teaser">Your ancestor commanded real ships across oceans — and got shot at in his own hotel.</div>
+          <button class="story-expand-btn" onclick="toggleStory(this)">Read more</button>
+        </div>
+        <div class="story-full">
+          <p>Hugh McKenzie Jr became a professional ship's captain. He commanded the "Rob Roy" in 1833, sailing from Ireland to Liverpool with coal and salt. In 1834 he captained the "Trial" at Kingston, Jamaica. In 1836 he mastered the "Fenwick Keating."</p>
+          <p>After arriving in Albany, he leased the Ship Inn — a pub right on the waterfront where whalers would drink. He had a white cockatoo above the bar that had been taught to say rude things to customers.</p>
+          <div class="quote">"Hello! Drunk again? Get out, you black cow!" — the cockatoo's favourite greeting</div>
+          <p>One day a French whaling captain wasn't impressed and took a shot at Hugh in his own hotel. Hugh survived!</p>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <div class="story-thumb thumb-green"></div>
+        <div class="story-body">
+          <div class="story-icon">🐋</div>
+          <div class="story-title">John the teenage whaler</div>
+          <div class="story-teaser">At just 14, John went out whale hunting to support his widowed mother.</div>
+          <button class="story-expand-btn" onclick="toggleStory(this)">Read more</button>
+        </div>
+        <div class="story-full">
+          <p>When John's father Hugh Jr died in 1854, his mother was widowed with several young children still at home. John was just 14 years old. He left school and went to work on whaling ships at Cheyne Beach Station, 40 miles east of Albany.</p>
+          <p>Whaling was incredibly dangerous and exhausting. Once a whale was spotted, the crew rowed out in small boats to harpoon it. A wounded whale could drag the boat at speed for hours, or turn and attack. After the whale tired, it was hauled back to the station and its blubber boiled down into oil — used for lamps, medicine and cosmetics.</p>
+          <p>John worked in whaling for 22 years. In 1876, a whale attacked his boat, killing two of his crew and fracturing several of John's ribs. He had to stop. He was 36 years old.</p>
+          <div class="quote">"He had a bad mishap while whaling at Doubtful Island Bay. Two men in his boat were killed by a small whale which attacked the boat. John was knocked overboard but scrambled back on." — Captain Sale's memoirs</div>
+          <p>Even decades later, in 1908, when a whale was found stranded near Albany, 68-year-old John rushed down with a harpoon "with all the enthusiasm of a veteran whaler" and killed it himself — using a harpoon that hadn't been used in 41 years!</p>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <div class="story-thumb thumb-amber"></div>
+        <div class="story-body">
+          <div class="story-icon">🏨</div>
+          <div class="story-title">The hotel dynasty</div>
+          <div class="story-teaser">Three generations of McKenzies ran pubs in early Albany.</div>
+          <button class="story-expand-btn" onclick="toggleStory(this)">Read more</button>
+        </div>
+        <div class="story-full">
+          <p>The McKenzies were central to Albany's social life for decades — through their hotels. Hugh Jr leased the Ship Inn in the 1840s, right on the waterfront. His son John bought the Freemasons Hotel in 1870 for £1,000.</p>
+          <p>John ran the Freemasons for years, then leased it out. In 1904 he spent nearly £3,000 on a massive renovation — turning it into a three-storey hotel described as being in the "Italian Renaissance style" and resembling "Monte Carlo." It had 56-60 rooms and was called "a model of its kind."</p>
+          <div class="quote">"In raising this fine building he has manifested a public spirit and a belief in the future of Albany which are exactly the qualities that make for the accomplishment of what is desirable." — Albany newspaper, 1905</div>
+          <p>John's son William later ran the Balara Hotel in Narrogin, and John also owned the Pier Hotel in Esperance and the Federal Hotel in Wagin. Hotels were the McKenzie business for over 60 years.</p>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <div class="story-thumb thumb-coral"></div>
+        <div class="story-body">
+          <div class="story-icon">🪓</div>
+          <div class="story-title">John chops down the fence</div>
+          <div class="story-teaser">When a company fenced off Albany's foreshore, John grabbed an axe.</div>
+          <button class="story-expand-btn" onclick="toggleStory(this)">Read more</button>
+        </div>
+        <div class="story-full">
+          <p>In the late 1880s, a company called the Western Australian Land Company built a railway line to Albany. The problem? They wanted to run it along the waterfront — blocking the townspeople's access to their own harbour.</p>
+          <p>The company started erecting fences on public streets. Albany residents were furious. John McKenzie — then in his late 40s and one of the town's most respected figures — decided to take direct action.</p>
+          <div class="quote">"John McKenzie personally went to the foot of Bridges Street with an axe, and chopped down a fence which had been illegally erected by the W.A. Land Company, thus starting a 'row' which terminated with the people of Albany asserting their right to be masters in their own town." — Albany memoir</div>
+          <p>The town council took the company to the Supreme Court — and won. The streets and access to the foreshore remained open to the public. John was a key witness in the case.</p>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <div class="story-thumb thumb-purple"></div>
+        <div class="story-body">
+          <div class="story-icon">⚗️</div>
+          <div class="story-title">Ernest the goldfields engineer</div>
+          <div class="story-teaser">From railway workshops to the gold rush — Ernest had the most varied career.</div>
+          <button class="story-expand-btn" onclick="toggleStory(this)">Read more</button>
+        </div>
+        <div class="story-full">
+          <p>Ernest George McKenzie, John's youngest son, was born in 1877. In 1895, aged 18, he started working at the Albany Railway workshops. In 1897 he headed to the goldfields at Norseman. He then worked on ships for the Adelaide Steamship Company.</p>
+          <p>In 1901, he graduated from the School of Mines in Adelaide, passing exams in assaying, chemistry, machine design, fitting and turning. He became a qualified mining engineer and went to work managing State gold batteries on the goldfields — including at Ora Banda, a remote mining town in the WA outback.</p>
+          <p>While studying in Adelaide he met Isabelle Niven Pearson, whose mother and aunt ran a school for girls. Isabelle was an accomplished musician and artist. They married in Albany in 1904.</p>
+          <p>In 1906, their daughter Margaret was born in Perth. In 1909, a son named John — after his grandfather — was born. Ernest died in 1941 and is buried at Karrakatta Cemetery.</p>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <div class="story-thumb thumb-green"></div>
+        <div class="story-body">
+          <div class="story-icon">🏛️</div>
+          <div class="story-title">John: Mayor, JP, and Freemason</div>
+          <div class="story-teaser">After hanging up his harpoon, John became the most important person in Albany.</div>
+          <button class="story-expand-btn" onclick="toggleStory(this)">Read more</button>
+        </div>
+        <div class="story-full">
+          <p>After his whaling accident in 1876, John retired from the sea and threw himself into building Albany. The list of things he did is remarkable:</p>
+          <ul style="margin: 12px 0 12px 20px; line-height:2;">
+            <li>Bought the Freemasons Hotel for £1,000 in 1870</li>
+            <li>Founded Albany's first Masonic Lodge in 1873 — the first lodge to build a hall in Western Australia</li>
+            <li>Elected to Albany Council in 1888; served 17 years</li>
+            <li>Elected Mayor three times: 1891, 1892, 1893</li>
+            <li>Appointed Justice of the Peace in 1894</li>
+            <li>Founded the King George Sound Coal Company in 1883</li>
+            <li>Helped found the Albany Turf Club</li>
+            <li>Donated land for the Albany Tennis Club</li>
+            <li>Won first prize for his potatoes at the 1902 Albany Show!</li>
+          </ul>
+          <p>When he died in 1914, his estate was valued at £11,526 — worth several million dollars today. He owned 17 parcels of land across WA.</p>
+          <div class="quote">"Although not a native of the State, Mr. McKenzie was brought here as a young baby and he spent almost the full 74 years of his life in the town." — eulogy, 1914</div>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <div class="story-thumb thumb-blue"></div>
+        <div class="story-body">
+          <div class="story-icon">🌋</div>
+          <div class="story-title">Johnny sails past Krakatoa</div>
+          <div class="story-teaser">John's son was at sea when the most destructive volcanic eruption in history happened.</div>
+          <button class="story-expand-btn" onclick="toggleStory(this)">Read more</button>
+        </div>
+        <div class="story-full">
+          <p>John Edward McKenzie Jr (known as Johnny) left Albany in 1883 at age 17 with his brother-in-law James Clark. They had bought a small vessel called the Ashburton and sailed north to establish a trading business at the mouth of the Ashburton River in the remote north-west of WA (now the town of Onslow).</p>
+          <p>The voyage took 11 days. As they arrived at the Ashburton River...</p>
+          <div class="quote">"The great Java Straits earthquake took place, causing a tidal wave to rush up the river and resulting in a great commotion." — family history</div>
+          <p>This was the eruption of Krakatoa — one of the most violent volcanic events ever recorded. The explosion was heard 5,000 kilometres away and killed over 36,000 people. Johnny and James would have felt the resulting tidal wave surge up the river around their boat.</p>
+          <p>Despite this dramatic beginning, their business — Clarke &amp; McKenzie — became very successful, operating as traders, shippers, and eventually pearlers. Sadly, Johnny died in Onslow in 1897, aged just 31, from a liver condition caused by the harsh climate.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MYSTERIES -->
+<div id="sec-about" class="section">
+  <div class="about-page">
+    <h2 class="section-heading">Family mysteries</h2>
+    <p>Every family has unanswered questions. Here are the things your family is still trying to figure out. Maybe you can help solve them one day!</p>
+
+    <h2>Unsolved mysteries 🔍</h2>
+
+    <div class="mystery-card">
+      <div class="mystery-title">When was Hugh Sr actually born?</div>
+      <div class="mystery-body">His tombstone suggests 1766, but land grant documents say 1769. Even the family historians aren't sure. It was probably somewhere between 1767 and 1769.</div>
+    </div>
+
+    <div class="mystery-card">
+      <div class="mystery-title">Who did Hugh Laurie (Gen 4) marry?</div>
+      <div class="mystery-body">John's letter from 1882 says "Hugh is married" but no marriage record has ever been found. His wife may have died before him. He's buried with his uncle Hugh and cousin James — not with a wife.</div>
+    </div>
+
+    <div class="mystery-card">
+      <div class="mystery-title">What happened to Emily (Gen 3)?</div>
+      <div class="mystery-body">Emily was Hugh Jr's daughter, born around 1832. She simply disappears from records. She doesn't appear in WA records at all. Did she move interstate? Nobody knows.</div>
+    </div>
+
+    <div class="mystery-card">
+      <div class="mystery-title">Was Isabelle Hind from Scotland or England?</div>
+      <div class="mystery-body">Hugh Jr's wife Isabelle (your great-great-grandmother) is described in one source as being born in "Preston, Lancashire" — in England. But the family came from Scotland. We don't yet know where she was really from or how she met Hugh.</div>
+    </div>
+
+    <div class="mystery-card">
+      <div class="mystery-title">Was Leslie actually Sabina's child?</div>
+      <div class="mystery-body">Albert's daughter Leslie Evelyn (born 1905) has duplicate birth certificates — one naming Albert's wife Catherine as the mother, and one naming Albert's sister Sabina. Family researcher Peter Brown suspects Sabina was the real mother. But nobody knows for sure.</div>
+    </div>
+
+    <div class="mystery-card">
+      <div class="mystery-title">Was there a brother called James in Gen 3?</div>
+      <div class="mystery-body">Some records suggest Hugh Jr had a son called James who is buried in Albany. But the family historian believes there was no James, because the Scottish naming tradition was strictly followed and the first son would have been named Hugh — which he was.</div>
+    </div>
+
+    <h2 style="margin-top:32px;">Want to help? 🙋</h2>
+    <p>If you know anything that could solve these mysteries — old photos, letters, stories passed down from relatives, or anything from Ancestry.com — please share it with the family! Every small detail can unlock a big discovery.</p>
+
+    <p>The family records in this website are based on documents going back to the 1760s, plus research in Albany Historical Society records, cemetery records, and old newspapers from Trove (the National Library of Australia's digital archive).</p>
+  </div>
+</div>
+
+<!-- MAP -->
+<div id="sec-map" class="section">
+  <div class="map-page">
+    <h2 class="section-heading">Migration map</h2>
+    <p class="section-sub">Click each stop to discover how the McKenzies got there — and what happened. The dotted lines show the routes.</p>
+
+    <div class="stop-cards" id="stopCards"></div>
+
+    <div id="map"></div>
+
+    <div class="map-legend">
+      <div class="map-legend-item"><div class="leg-line" style="background:#185FA5; border-top: 2px dashed #185FA5;"></div> By sea ⛵</div>
+      <div class="map-legend-item"><div class="leg-line" style="background:#BA7517;"></div> By land 🚶</div>
+      <div class="map-legend-item"><div class="leg-line" style="background:#0F6E56;"></div> By rail 🚂</div>
+    </div>
+
+    <div id="map-detail" style="display:none; background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-top:16px;">
+      <div style="display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:200px;">
+          <div id="md-year" style="font-size:12px; font-weight:700; color:var(--green-mid); letter-spacing:0.06em; margin-bottom:4px;"></div>
+          <div id="md-place" style="font-family:&#39;Playfair Display&#39;,serif; font-size:22px; margin-bottom:8px;"></div>
+          <div id="md-transport" style="margin-bottom:12px;"></div>
+          <div id="md-body" style="font-size:14px; color:var(--text-muted); line-height:1.75;"></div>
+        </div>
+        <div style="flex:0 0 200px;">
+          <div class="photo-placeholder" id="md-photo">
+            📷 Photos coming soon!<br><span style="font-size:11px;">Upload photos of this location to see them here.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./The McKenzie Story_files/leaflet.js.download"></script>
+<script>
+// ── existing show() / openPerson() / toggleStory() ──────────────────────────
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'map') initMap();
+}
+
+// ── MAP DATA ────────────────────────────────────────────────────────────────
+const stops = [
+  {
+    id: 0,
+    year: '~1767–1793',
+    place: 'Invergordon, Scotland',
+    country: 'Scotland 🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+    lat: 57.69, lng: -4.17,
+    transport: null,
+    transportIcon: '🏡',
+    transportLabel: 'Home',
+    color: '#0F6E56',
+    body: 'Hugh McKenzie Sr is born here in the rugged Scottish Highlands, near the Cromarty Firth. The McKenzie clan has deep roots in this landscape. Hugh grows up here before joining the army.',
+    photo: null
+  },
+  {
+    id: 1,
+    year: '1794–1802',
+    place: 'Drogheda, Ireland',
+    country: 'Ireland 🇮🇪',
+    lat: 53.72, lng: -6.35,
+    transport: 'sea',
+    transportIcon: '⛵',
+    transportLabel: 'By sea (military ship)',
+    color: '#993C1D',
+    body: 'Hugh\'s regiment, the Caithness Legion, is sent to Ireland to fight in the Rebellion of 1798. He serves for 7 years and 7 months, reaching the rank of Sergeant. Near Drogheda he meets Bridget Erskine — they marry around 1801.',
+    photo: null
+  },
+  {
+    id: 2,
+    year: '1803–1825',
+    place: 'Kirkcudbright, Scotland',
+    country: 'Scotland 🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+    lat: 54.84, lng: -4.06,
+    transport: 'sea',
+    transportIcon: '⛵',
+    transportLabel: 'By sea (returned from Ireland)',
+    color: '#0F6E56',
+    body: 'The family settles in the south-west of Scotland, far from where Hugh grew up. Children are born here: John (1803), Hugh Jr (1804), Kenneth (1806). Later the family moves to nearby Balmaghie. Hugh works in coastal trading — probably already familiar with ships.',
+    photo: null
+  },
+  {
+    id: 3,
+    year: 'April 1826',
+    place: 'Saint John, New Brunswick, Canada',
+    country: 'Canada 🇨🇦',
+    lat: 45.27, lng: -66.06,
+    transport: 'sea',
+    transportIcon: '⛵',
+    transportLabel: 'By sailing ship (Atlantic crossing ~6 weeks)',
+    color: '#185FA5',
+    body: 'The McKenzies are victims of the Highland Clearances — landlords evicted thousands of Scottish families to make room for sheep. One source calls Hugh "an exile from Scotland." The family crosses the Atlantic and arrives at St John. Within 10 days Hugh applies for 200 acres of land at English Settlement, 60km away.',
+    photo: null
+  },
+  {
+    id: 4,
+    year: '1826–1840',
+    place: 'Nova Scotia, Canada',
+    country: 'Canada 🇨🇦',
+    lat: 44.68, lng: -63.74,
+    transport: 'land',
+    transportIcon: '🚶',
+    transportLabel: 'By land (overland move)',
+    color: '#185FA5',
+    body: 'The family builds a life in Canada over 14 years. Hugh Jr becomes a ship\'s captain, sailing across the Atlantic. Baby John is born here in April 1840 — the last McKenzie born before the great voyage to Australia. Just 6 months later, the whole family gets on a ship to the other side of the world.',
+    photo: null
+  },
+  {
+    id: 5,
+    year: 'October 1840',
+    place: 'Cape of Good Hope, South Africa',
+    country: 'South Africa 🇿🇦',
+    lat: -33.96, lng: 18.47,
+    transport: 'sea',
+    transportIcon: '⛵',
+    transportLabel: 'By sailing ship "The Brothers" (~2 months)',
+    color: '#534AB7',
+    body: 'On the long voyage from Canada to Australia, the ship "The Brothers" rounds the southern tip of Africa at the Cape of Good Hope. On board: the entire extended McKenzie family, including 6-month-old baby John. The journey takes about 2 months in total.',
+    photo: null
+  },
+  {
+    id: 6,
+    year: 'December 1840',
+    place: 'Albany, Western Australia',
+    country: 'Australia 🇦🇺',
+    lat: -35.02, lng: 117.88,
+    transport: 'sea',
+    transportIcon: '⛵',
+    transportLabel: 'By sailing ship "The Brothers"',
+    color: '#BA7517',
+    body: 'The McKenzies arrive in Albany — a tiny town of just 200 people on the wild south coast of Western Australia. Hugh Sr dies within weeks of arriving, aged about 74. But the family stays. Albany will be the McKenzie home for generations. John McKenzie will live here for 74 years and become one of the town\'s founders.',
+    photo: null
+  },
+  {
+    id: 7,
+    year: '1883',
+    place: 'Onslow, Western Australia',
+    country: 'Australia 🇦🇺',
+    lat: -21.64, lng: 115.11,
+    transport: 'sea',
+    transportIcon: '⛵',
+    transportLabel: 'By ketch "Ashburton" (11 days north)',
+    color: '#BA7517',
+    body: 'John\'s son Johnny (17) and brother-in-law James Clark sail north on their own ketch "Ashburton" to establish a trading post at the mouth of the Ashburton River. As they arrive, they feel the tidal wave from the Krakatoa volcanic eruption! Their firm Clarke & McKenzie becomes very successful. Johnny dies here in 1897, aged 31.',
+    photo: null
+  },
+  {
+    id: 8,
+    year: '1895–1904',
+    place: 'Kalgoorlie & Ora Banda, WA',
+    country: 'Australia 🇦🇺',
+    lat: -30.75, lng: 121.47,
+    transport: 'rail',
+    transportIcon: '🚂',
+    transportLabel: 'By Great Southern Railway then overland',
+    color: '#3B6D11',
+    body: 'Ernest McKenzie (John\'s youngest son) heads to the goldfields during WA\'s famous gold rush. He works at various goldfields including Norseman, Coolgardie and Ora Banda. He studies at the School of Mines and becomes a qualified engineer. He manages State gold batteries — giant machines for crushing and processing gold ore.',
+    photo: null
+  }
+];
+
+// Routes between stops (from, to, type)
+const routes = [
+  { from: 0, to: 1, type: 'sea' },
+  { from: 1, to: 2, type: 'sea' },
+  { from: 2, to: 3, type: 'sea' },
+  { from: 3, to: 4, type: 'land' },
+  { from: 4, to: 5, type: 'sea' },
+  { from: 5, to: 6, type: 'sea' },
+  { from: 6, to: 7, type: 'sea' },
+  { from: 6, to: 8, type: 'rail' }
+];
+
+const routeColors = { sea: '#185FA5', land: '#BA7517', rail: '#0F6E56' };
+const routeDash = { sea: '8 6', land: '4 4', rail: '12 4' };
+
+let mapInited = false;
+let leafMap = null;
+let markers = [];
+
+function initMap() {
+  if (mapInited) return;
+  mapInited = true;
+
+  leafMap = L.map('map', { zoomControl: true, scrollWheelZoom: false })
+    .setView([30, 10], 2);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 10
+  }).addTo(leafMap);
+
+  // Draw routes
+  routes.forEach(r => {
+    const from = stops[r.from];
+    const to = stops[r.to];
+    // Great-circle curve via mid-point offset
+    const midLat = (from.lat + to.lat) / 2;
+    const midLng = (from.lng + to.lng) / 2;
+    const lats = [
+      [from.lat, from.lng],
+      [midLat, midLng],
+      [to.lat, to.lng]
+    ];
+    L.polyline(lats, {
+      color: routeColors[r.type],
+      weight: r.type === 'sea' ? 2.5 : 2,
+      dashArray: routeDash[r.type],
+      opacity: 0.75
+    }).addTo(leafMap);
+  });
+
+  // Build stop cards + markers
+  const cardContainer = document.getElementById('stopCards');
+  cardContainer.innerHTML = '';
+
+  stops.forEach((s, i) => {
+    // Marker icon
+    const iconHtml = `<div style="
+      width:34px;height:34px;border-radius:50%;
+      background:${s.color};border:3px solid #fff;
+      box-shadow:0 2px 8px rgba(0,0,0,0.3);
+      display:flex;align-items:center;justify-content:center;
+      font-size:14px;font-weight:700;color:#fff;
+      cursor:pointer;
+    ">${i + 1}</div>`;
+
+    const icon = L.divIcon({ html: iconHtml, className: '', iconSize: [34, 34], iconAnchor: [17, 17] });
+    const marker = L.marker([s.lat, s.lng], { icon }).addTo(leafMap);
+
+    marker.bindPopup(`
+      <div style="min-width:200px;">
+        <div class="map-popup-year">${s.year}</div>
+        <div class="map-popup-title">${s.place}</div>
+        <div style="font-size:12px;color:#666;margin-bottom:6px;">${s.transportIcon} ${s.transportLabel || 'Starting point'}</div>
+        <div class="map-popup-body">${s.body.substring(0, 120)}...</div>
+      </div>
+    `, { maxWidth: 260 });
+
+    marker.on('click', () => selectStop(i));
+    markers.push(marker);
+
+    // Stop card
+    const card = document.createElement('div');
+    card.className = 'stop-card';
+    card.id = `stop-card-${i}`;
+    card.innerHTML = `
+      <div class="stop-num" style="background:${s.color}">${i + 1}</div>
+      <div class="stop-year">${s.year}</div>
+      <div class="stop-place">${s.place}</div>
+      <div class="stop-how">${s.country}</div>
+      ${s.transportLabel ? `<div class="transport-pill">${s.transportIcon} ${s.transportLabel}</div>` : ''}
+    `;
+    card.onclick = () => selectStop(i);
+    cardContainer.appendChild(card);
+  });
+}
+
+function selectStop(i) {
+  const s = stops[i];
+
+  // Highlight card
+  document.querySelectorAll('.stop-card').forEach((c, idx) => {
+    c.classList.toggle('active', idx === i);
+  });
+  const activeCard = document.getElementById(`stop-card-${i}`);
+  if (activeCard) activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+  // Fly map to location
+  leafMap.flyTo([s.lat, s.lng], 5, { duration: 1.2 });
+  markers[i].openPopup();
+
+  // Show detail panel
+  document.getElementById('map-detail').style.display = 'block';
+  document.getElementById('md-year').textContent = s.year;
+  document.getElementById('md-place').textContent = s.place;
+  document.getElementById('md-transport').innerHTML = s.transportLabel
+    ? `<div class="transport-pill" style="font-size:13px;padding:5px 14px;">${s.transportIcon} ${s.transportLabel}</div>`
+    : '';
+  document.getElementById('md-body').textContent = s.body;
+  document.getElementById('md-photo').innerHTML = s.photo
+    ? `<img src="${s.photo}" style="width:100%;border-radius:8px;" alt="${s.place}">`
+    : `📷 <strong>Photos coming soon!</strong><br><span style="font-size:11px;">Upload photos of ${s.place} to see them here.</span>`;
+}
+</script>
+
+<script>
+// ── People data ──────────────────────────────────────────────────────────────
+const people = {
+  hugh1: {
+    name: 'Hugh McKenzie Sr', dates: '~1767 – 15 January 1841', initials: 'H1', bg: '#E6F1FB', fg: '#0C447C',
+    body: 'Hugh is the founder of your Australian family line. Born in the Scottish Highlands, he became a soldier, fought in the Irish Rebellion of 1798, returned to Scotland, was forced out by the Highland Clearances, moved to Canada, and then sailed to Australia in his 70s. He arrived in Albany in December 1840 and died just weeks later.',
+    facts: [['Born', '~1767, Invergordon, Scotland'], ['Military', 'Caithness Legion, Sergeant'], ['Married', 'Bridget Erskine, ~1801'], ['Arrived Albany', 'December 1840'], ['Died', '15 January 1841, Albany']],
+    wow: 'Crossed three continents in one lifetime'
+  },
+  bridget: {
+    name: 'Bridget Erskine', dates: 'Married ~1801', initials: 'BE', bg: '#FBEAF0', fg: '#72243E',
+    body: 'Bridget met Hugh near Drogheda, Ireland, while he was serving in the military. She may have had family in the Drogheda area. She married Hugh around 1801–02 and had at least six children who survived to adulthood. She made the extraordinary journey from Ireland to Scotland, then Canada, then Australia.',
+    facts: [['Married', '~1801, near Drogheda, Ireland'], ['Children', 'John, Hugh Jr, Kenneth, Edward, and others']],
+    wow: 'Crossed the Atlantic twice and the Indian Ocean once'
+  },
+  john_g2: {
+    name: 'John McKenzie', dates: 'b. 9 May 1803', initials: 'JM', bg: '#E6F1FB', fg: '#0C447C',
+    body: 'John was the eldest child of Hugh Sr and Bridget, born in Kirkcudbright, Scotland. He came to Australia with the family in 1840.',
+    facts: [['Born', '9 May 1803, Kirkcudbright, Scotland']],
+    wow: ''
+  },
+  hugh2: {
+    name: 'Hugh McKenzie Jr', dates: '6 October 1804 – 9 June 1854', initials: 'H2', bg: '#E6F1FB', fg: '#0C447C',
+    body: 'Hugh Jr was a professional ship\'s captain. He commanded vessels across the Atlantic, sailing cargo between Ireland, England and the Caribbean. After arriving in Albany, he ran the Ship Inn hotel — which had a famous cockatoo that insulted customers. He died in 1854 and a French whaling captain once shot at him in his own pub (he survived).',
+    facts: [['Born', '6 Oct 1804, Kirkcudbright'], ['Married', 'Isabelle Hind, ~1824'], ['Died', '9 June 1854, Albany WA'], ['Ships', 'Rob Roy (1833), Trial (1834), Fenwick Keating (1836)']],
+    wow: 'Ship captain at age 29 — sailed to Jamaica'
+  },
+  kenneth_g2: {
+    name: 'Kenneth McKenzie', dates: '8 August 1806 – 1844', initials: 'KM', bg: '#E6F1FB', fg: '#0C447C',
+    body: 'Kenneth was Hugh Sr\'s third son. He sailed with the family to Australia and later took over command of the family ship "The Brothers" with his brother Edward. He died off the coast of New South Wales in 1844.',
+    facts: [['Born', '8 Aug 1806, Kirkcudbright'], ['Died', '1844, off NSW coast']],
+    wow: 'Commanded a ship in Australian waters'
+  },
+  edward_g2: {
+    name: 'Edward McKenzie', dates: '~1813 – 1854', initials: 'EM', bg: '#E6F1FB', fg: '#0C447C',
+    body: 'Edward was the youngest of Hugh Sr\'s sons. He co-commanded the ship "The Brothers" with Kenneth. He eventually made his way to San Francisco, California — right in the middle of the Gold Rush era — where he died in 1854.',
+    facts: [['Born', '~1813'], ['Died', '1854, San Francisco, California']],
+    wow: 'Died in San Francisco during the Gold Rush'
+  },
+  isabella_g3: {
+    name: 'Isabella McKenzie', dates: 'b. ~1830', initials: 'IM', bg: '#FBEAF0', fg: '#72243E',
+    body: 'Isabella was one of the children who arrived in Albany as a little girl. She married John Rufus Bruce — an interesting character who had fled Scotland after accidentally burning down his parents\' home! They had children together. She later had five more children with American Edgar Medcalf before eventually marrying him.',
+    facts: [['Born', '~1830'], ['Married 1', 'John Bruce, 26 Dec 1850'], ['Married 2', 'Edgar Medcalf, 1875'], ['Died', '1890']],
+    wow: 'Her first husband had fled Scotland under a false name'
+  },
+  emily_g3: {
+    name: 'Emily McKenzie', dates: 'b. ~1832', initials: 'EM', bg: '#FBEAF0', fg: '#72243E',
+    body: 'Emily was one of Hugh Jr\'s daughters who came to Australia. She disappears from records completely — she doesn\'t appear in any Western Australian records. She may have moved to another state. This is one of the family\'s unsolved mysteries.',
+    facts: [['Born', '~1832']],
+    wow: 'One of the family\'s great mysteries — where did she go?'
+  },
+  hugh_g3: {
+    name: 'Hugh McKenzie', dates: 'b. ~1834 – 1902', initials: 'HM', bg: '#E6F1FB', fg: '#0C447C',
+    body: 'Hugh ran the Ship Inn in Albany through the 1860s and 1870s — the hotel with the rude cockatoo! He was married (as confirmed in a letter from brother John in 1882) but no marriage record has been found. He died in 1902 while visiting Perth, collapsing in a café and dying of apoplexy three hours later.',
+    facts: [['Born', '~1834'], ['Died', 'September 1902, Perth'], ['Hotel', 'Ran the Ship Inn, Albany']],
+    wow: 'Had a cockatoo that shouted insults at customers'
+  },
+  brigid_g3: {
+    name: 'Brigid McKenzie', dates: '~1836 – 4 September 1860', initials: 'BM', bg: '#FBEAF0', fg: '#72243E',
+    body: 'Brigid married John Loddington in 1854 — he had arrived on a ship and worked for the P&O shipping company. They had three children including Camilla and Cuthbert. Brigid died tragically young at about 34 from brain fever (probably meningitis), leaving three small children. She is buried in Albany\'s Memorial Park Cemetery.',
+    facts: [['Born', '~1836'], ['Married', 'John Loddington, 18 Mar 1854'], ['Died', '4 Sep 1860, Albany'], ['Buried', 'Memorial Park, Grave 0450']],
+    wow: 'Her husband worked for P&O — one of the world\'s first airlines'
+  },
+  catherine_g3: {
+    name: 'Catherine McKenzie', dates: 'b. ~1838 – 1870', initials: 'CM', bg: '#FBEAF0', fg: '#72243E',
+    body: 'Catherine was born in Scotland around 1838 and came to Australia with the family. She never married and died in Albany in 1870. She is buried in the Albany cemetery. Her sister-in-law Jannett was buried beside her when she died in 1881.',
+    facts: [['Born', '~1838, Scotland'], ['Died', '1870, Albany'], ['Buried', 'Albany cemetery']],
+    wow: ''
+  },
+  john_g3: {
+    name: 'John McKenzie', dates: '15 April 1840 – 26 March 1914', initials: 'JM', bg: '#E1F5EE', fg: '#085041',
+    body: 'John is the most remarkable figure in your family history. Born in Nova Scotia just months before the family sailed for Australia, he arrived in Albany as a baby and spent 74 years there. At 14 he became a whaler after his father died. He worked at sea for 22 years before a whale accident forced him ashore. He then built a business empire, became Mayor three times, founded Albany\'s first Masonic Lodge, fought for public rights to the foreshore, and was remembered as one of the town\'s founding fathers.',
+    facts: [['Born', '15 Apr 1840, Nova Scotia, Canada'], ['Died', '26 Mar 1914, Albany WA'], ['Married 1', 'Jannett Moir, 30 Nov 1861'], ['Married 2', 'Elizabeth Williams, Jul 1885'], ['Married 3', 'Sarah Wray, ~1887'], ['Whaling', 'Age 14–36 (22 years)'], ['Hotel', 'Freemasons, bought 1870'], ['Mayor', '3 terms: 1891–1894'], ['Estate', '£11,526 (17 land parcels)']],
+    wow: 'Became Mayor of Albany three times — starting as a teenage whaler'
+  },
+  margaret_g3: {
+    name: 'Margaret McKenzie', dates: 'b. 28 March 1842', initials: 'MM', bg: '#FBEAF0', fg: '#72243E',
+    body: 'Margaret holds a special place in the family — she was the first McKenzie child born on Australian soil! She was born in Albany on 28 March 1842, just over a year after the family arrived. She later married a Mr. Smith (or Smyth) and moved to Melbourne, where she had at least five children.',
+    facts: [['Born', '28 March 1842, Albany WA'], ['Significance', 'First McKenzie born in Australia!'], ['Married', 'Mr Smith/Smyth'], ['Moved to', 'Melbourne']],
+    wow: 'First McKenzie born on Australian soil!'
+  },
+  cuthbert_g3: {
+    name: 'Cuthbert McKenzie', dates: 'b. 1851', initials: 'CM', bg: '#E1F5EE', fg: '#085041',
+    body: 'Cuthbert was the first surviving male McKenzie born in Australia! Like his brother John, he was a whaler in his youth. He later ran the Freemasons Hotel. He was elected to Albany\'s Municipal Council in 1888 and spent seven years as Mayor between 1898 and 1908. He went further than John in politics — he was elected to the Western Australian Legislative Council in 1910 and served two six-year terms as an MP.',
+    facts: [['Born', '1851, Albany WA'], ['Mayor', '7 years: 1898–1908'], ['MP', 'WA Legislative Council, 1910–1922'], ['Married', 'Grace Cheyne Moir']],
+    wow: 'Member of the WA Parliament — first McKenzie politician'
+  },
+  hugh_g4: {
+    name: 'Hugh Laurie Hinds McKenzie', dates: '26 May 1862 – 23 July 1914', initials: 'HL', bg: '#E6F1FB', fg: '#0C447C',
+    body: 'Hugh Laurie was John\'s eldest son. His middle name "Hind" was his grandmother Isabelle\'s family name. He worked in the Onslow area alongside his brother-in-law James Clark in the 1880s. He died in Perth just 4 months after his father John. He is buried with his uncle Hugh and cousin James Smith in the same grave.',
+    facts: [['Born', '26 May 1862, Albany'], ['Died', '23 July 1914, Perth']],
+    wow: 'Died just 4 months after his father'
+  },
+  emaline: {
+    name: 'Emaline Collier McKenzie', dates: 'b. 24 October 1863 – 1943', initials: 'EC', bg: '#FBEAF0', fg: '#72243E',
+    body: 'Emaline married marine engineer James Clark in 1881, just 10 weeks after her mother Jannett died — she may have stayed behind to look after her younger siblings before joining her husband. James and her brother Johnny sailed north to establish the town of Onslow. Emaline followed in 1884 with their 18-month-old baby. She and James raised a family at Onslow and later moved to Claremont.',
+    facts: [['Born', '24 Oct 1863'], ['Married', 'James Clark, July 1881'], ['Lived', 'Onslow, then Claremont'], ['Died', '1943']],
+    wow: 'Arrived in remote Onslow with a baby during a tidal wave year'
+  },
+  johnjr: {
+    name: 'John Edward McKenzie Jr', dates: '1866 – 31 August 1897', initials: 'JE', bg: '#E6F1FB', fg: '#0C447C',
+    body: 'Known as "Johnny," John Edward left Albany at 17 and sailed north with his brother-in-law James Clark to found a trading business at Onslow. On arrival, they experienced the tidal wave from the Krakatoa volcanic eruption! Their business Clarke & McKenzie became very successful. Johnny was about to retire and return to Albany to marry when he died of a liver condition in 1897, aged just 31.',
+    facts: [['Born', '1866, Albany'], ['Education', 'Melbourne Grammar School'], ['Business', 'Clarke & McKenzie, Onslow'], ['Krakatoa', 'Felt the tidal wave, 1883'], ['Died', '31 Aug 1897, Onslow, aged 31']],
+    wow: 'Was at sea when Krakatoa erupted'
+  },
+  william: {
+    name: 'William Cuthbert McKenzie', dates: '1868 – 22 November 1901', initials: 'WC', bg: '#E6F1FB', fg: '#0C447C',
+    body: 'William married Celia Sheppard in 1891. He ran the Balara Hotel in a small town called Caballing, following the family hotel tradition. He and Celia had six children. William died in Beaconsfield, Fremantle in 1901, aged 33, after a long illness.',
+    facts: [['Born', '1868'], ['Married', 'Celia Sheppard, 1891'], ['Hotel', 'Balara Hotel, Caballing'], ['Died', '22 Nov 1901, Fremantle, aged 33']],
+    wow: ''
+  },
+  albert: {
+    name: 'Albert Henry McKenzie', dates: '2 April 1870 – February 1916', initials: 'AH', bg: '#E6F1FB', fg: '#0C447C',
+    body: 'Known as "Big Bob Mac," Albert was one of the first prospectors on the Ashburton goldfields in 1886, aged just 16. He took one of the first overland treks from Ashburton to Lake Austin — a journey of over 1,300km! He later settled down, bought a large farm called Fairfield at Broomhill, and married Catherine Dillon in 1896.',
+    facts: [['Born', '2 Apr 1870'], ['Nickname', '"Big Bob Mac"'], ['Goldfields', 'Ashburton, Coolgardie, Benson'], ['Farm', 'Fairfield, Broomhill'], ['Married 1', 'Catherine Dillon, 1896'], ['Died', 'February 1916']],
+    wow: 'One of the first gold prospectors in the Ashburton — aged 16'
+  },
+  leslie: {
+    name: 'Leslie Ernest McKenzie', dates: '1872 – 1926', initials: 'LE', bg: '#E6F1FB', fg: '#0C447C',
+    body: 'Leslie worked in the Customs Department, stationed at Albany, then Esperance, then Perth. He married Annie Roach in late 1897 but they had no children. When he died in 1926, his obituary noted that all his brothers Hugh, John, William and Albert had already died before him. Only his sister Sabina and brother Ernest were still alive.',
+    facts: [['Born', '1872'], ['Married', 'Annie Roach, ~Nov 1897'], ['Career', 'Customs Department'], ['Died', '1926, Perth']],
+    wow: ''
+  },
+  ernest: {
+    name: 'Ernest George McKenzie', dates: 'b. 21 July 1877 – 20 November 1941', initials: 'EG', bg: '#EAF3DE', fg: '#3B6D11',
+    body: 'Ernest had one of the most varied careers in the family. Railway worker at 18, gold rush miner, ships\' crewman, then qualified engineer from the School of Mines. He managed State gold batteries on the goldfields at Ora Banda. He married the talented Isabelle Pearson in 1904. They had a daughter Margaret (1906) and son John (1909). Ernest is the line this family history follows into later generations.',
+    facts: [['Born', '21 Jul 1877'], ['Married', 'Isabelle Pearson, 30 Jun 1904'], ['Qualified', 'School of Mines, Adelaide, 1901'], ['Career', 'Mining engineer, Goldfields WA'], ['Children', 'Margaret (1906), John (1909)'], ['Died', '20 Nov 1941, Karrakatta']],
+    wow: 'Railway worker → gold miner → qualified engineer'
+  },
+  sabina: {
+    name: 'Sabina Janet McKenzie', dates: '22 May 1879 – 1958', initials: 'SJ', bg: '#FBEAF0', fg: '#72243E',
+    body: 'Sabina ("Beanie") was the youngest of John and Jannett\'s children. She never married and lived with her father all her life at the family home "Tulloch Ard" on York Street in Albany. After John\'s death in 1914, she continued to live there with his widow Sarah until Sarah died in 1937. Sabina lived in the house until it was sold in 1962 and demolished in 1964. She died in 1958.',
+    facts: [['Born', '22 May 1879'], ['Home', 'Tulloch Ard, York Street, Albany'], ['Died', '1958']],
+    wow: 'Lived her whole life in the family home — 79 years in one house'
+  }
+};
+
+function openPerson(id) {
+  document.querySelectorAll('.pcard').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.pcard').forEach(c => {
+    if (c.getAttribute('onclick') === `openPerson('${id}')`) c.classList.add('active');
+  });
+  const p = people[id];
+  if (!p) return;
+  const panel = document.getElementById('detail');
+  const av = document.getElementById('d-av');
+  av.style.background = p.bg;
+  av.style.color = p.fg;
+  av.textContent = p.initials;
+  document.getElementById('d-name').textContent = p.name;
+  document.getElementById('d-dates').textContent = p.dates;
+  document.getElementById('d-body').textContent = p.body;
+  document.getElementById('d-facts').innerHTML = p.facts.map(f =>
+    `<div class="fact-card"><div class="fact-label">${f[0]}</div><div class="fact-val">${f[1]}</div></div>`
+  ).join('');
+  document.getElementById('d-wow').innerHTML = p.wow
+    ? `<span class="wow-badge">${p.wow}</span>` : '';
+  panel.classList.add('open');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function toggleStory(btn) {
+  const card = btn.closest('.story-card');
+  const full = card.querySelector('.story-full');
+  const isOpen = full.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  btn.textContent = isOpen ? 'Close' : 'Read more';
+  if (isOpen) btn.classList.add('open');
+}
+</script>
+
+
+</body></html>
